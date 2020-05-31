@@ -1,16 +1,32 @@
 
 from pokemon_api import getPokemon
 
-__generateBorder = lambda x, symbol='*' : symbol * (x+14)
-__frameString = lambda str, symbol='*': f"{__generateBorder(len(str),symbol)}\n\t{str}\n{__generateBorder(len(str),symbol)}"
+generate_border = lambda x, symbol='*': symbol * (x+14)
+frame_string = lambda str, symbol='*': f"{generate_border(len(str),symbol)}\n\t{str}\n{generate_border(len(str),symbol)}"
 
-bannerMessage= 'Who is that Pokemon!?'
-banner = __frameString(bannerMessage)
-print(banner)
+
+def sanitize(s): return s.replace(' ', '-').replace('.', '').lower()
+
+
+generate_border = lambda x, symbol='*': symbol * (x+14)
+
+
+BANNER_MESSAGE = 'Who is that Pokemon!?'
+BANNER = frame_string(BANNER_MESSAGE)
+HELP_BLOCK = frame_string('type q! to exit.', '~')
+
+print(BANNER)
+print(HELP_BLOCK)
 
 while True:
+    QUIT_CHARACTER = 'q!'
     name = input('=> ')
-    pokemon,types = getPokemon(name)
-    typeString = '/'.join(types)
-    card =  __frameString(f"It's {name}! Type: {typeString}",'-')
+    # Allow the user to terminate the program
+    if name == QUIT_CHARACTER:
+        quit()
+    display_name = name.strip()
+    sanitized_name = sanitize(display_name)
+    pokemon, types = getPokemon(sanitized_name)
+    type_string = '/'.join(types)
+    card = frame_string(f"It's {name}! Type: {type_string}", '-')
     print(card)

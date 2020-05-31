@@ -1,15 +1,19 @@
 
 import json
-from urllib.request import Request, urlopen
-from urllib.parse import urlparse, quote
-from urllib.error import HTTPError
 from pprint import pprint as pp
+from urllib.error import HTTPError
+from urllib.parse import quote, urlparse
+from urllib.request import Request, urlopen
 
-pokemon_url = 'https://pokeapi.co/api/v2/'
+POKEMON_URL = 'https://pokeapi.co/api/v2/'
 
-_generate_url = lambda pokemon :pokemon_url + 'pokemon/' + pokemon
 
-_get = lambda url : urlopen(Request(url,headers={'User-Agent':'Code Club'}))
+def _generate_url(pokemon): return POKEMON_URL + 'pokemon/' + pokemon
+
+
+def _get(url): return urlopen(
+    Request(url, headers={'User-Agent': 'Code Club'}))
+
 
 def getPokemon(pokemonName):
     """ Given a pokemon name, return it's type from pokeapi
@@ -17,24 +21,33 @@ def getPokemon(pokemonName):
     Arguments:
         pokemonName str -- The name of a pokemon
     Returns:
-        tuple
+        tuple (pokemon, types)
+    Raises:
+        ValueError: If Pokemon is not found within API.
     """
-    _url = _generate_url(pokemonName)
-    _url =  _url[:6] + quote(_url[6:])
+
+    url = _generate_url(pokemonName)
+    # This is a little bit of a hack that will preserve the protocol section of the url when quoting.
+    url = url[:6] + quote(url[6:])
+
     try:
-         with _get(_url) as response:
-            data= response.read() 
-            data= json.loads(data)
-            types= [t['type']['name'] for t in data['types']]
+        with _get(url) as response:
+            data = response.read()
+            data = json.loads(data)
+            types = [t['type']['name'] for t in data['types']]
             return pokemonName, types
 
     except HTTPError as ex:
-         codes ={
-             404 : lambda x : ValueError(f"{pokemonName} is not a valid Pokemon")
-         }
-         execption = codes.get(ex.getcode())
-         pp(execption)
-         if(execption):
-             raise execption
-         raise ex    
+        # Dictionary below is useful for simplifying branching.
+        codes = {
+            404: ValueError(f"{pokemonName} is not a valid Pokemon"),
+        }
 
+        code = ex.getcode()
+        exception_object = codes.get(code)
+
+        # If http status code is not registed with codes, throw the initial exeption.
+        if(exception_object is None):
+            raise ex
+        else:
+            raise exception_object
