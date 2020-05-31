@@ -26,7 +26,10 @@ while True:
         quit()
     display_name = name.strip()
     sanitized_name = sanitize(display_name)
-    pokemon, types = getPokemon(sanitized_name)
-    type_string = '/'.join(types)
-    card = frame_string(f"It's {name}! Type: {type_string}", '-')
-    print(card)
+    try:
+        pokemon, types = getPokemon(sanitized_name)
+        type_string = '/'.join(types)
+        card = frame_string(f"It's {display_name}! Type: {type_string}", '-')
+        print(card)
+    except ValueError as ex:
+        print('Error:', ex)
